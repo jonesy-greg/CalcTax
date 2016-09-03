@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CalcTax v1.0</title>
+        <link rel="stylesheet" type="text/css" href="css/index.css"/>
+        <script type="text/javascript" language="JavaScript">
+// create a new item with price
+function createNewItem(item_value)	{
+					var item = item_value;
+					var taxcurrent = document.getElementById('tax_rate').value;
+					var itemcount = document.getElementById('total_items').value;
+					var regex = /^[0-9]\d*(((,\d{3}){1})?(\.\d{0,2})?)$/;
+					
+					//
+						
+						// if no item, alert and stop calculation
+						if (item == "") {
+							alert("Item price cannot be empty or contain invalid characters.");
+						}
+						
+						// if item, calculate
+						else {
+
+								if(regex.test(taxcurrent)) {
+								
+										// if no tax rate specific, prompt to proceed with zero percent rate - only if this is the first item being calculated
+										if (taxcurrent == 0) {
+										
+												if (itemcount == 0) {
+												var checkzero = confirm("Proceed with a tax rate of 0%?");
+												if (checkzero == true) {
+													calcZero(item);
+												}
+												else {
+													return;
+												}
+										}
+											if (itemcount > 0) {
+													calcZero(item);											
+											}
+										}
+										if (taxcurrent > 0) {
+											calcTax(item);				
+										}
+								}
+								else {
+									alert("Tax rate invalid.");
+									document.getElementById('tax_rate').value=0;
+									
+								
+								}
+						}
+												 
+}
+
+function onCalcLoad()
+{
+	document.getElementById('total_cost').readOnly = true;
+	document.getElementById('total_items').readOnly = true;
+
+ 
+}
+
+
+function clearItemData() {
+		// on click, null fields
+		document.getElementById('total_items').value=0;
+		document.getElementById('item_subtotal').value=0.00;
+		document.getElementById('tax_total').value=0.00;
+		document.getElementById('total_cost').value=0.00;
+		document.getElementById('item_price').value=null;
+		document.getElementById('tax_rate').value=0;
+		document.getElementById('item_quantity').value=1;
+}
+
+function calcTax(item) {
+							//var item = item_value;
+							var sum = document.getElementById('total_cost').value;
+							var tax = document.getElementById('tax_rate').value;
+							var quant = document.getElementById('item_quantity').value;
+							var current_quant =	document.getElementById('total_items').value;
+
+							var quant_item = parseFloat(item) * parseFloat(quant);
+							var taxpercent = tax / 100;
+							var quant_item = parseFloat(item) * parseFloat(quant);
+							var sumplus = parseFloat(sum) + parseFloat(quant_item);
+							var taxcost = parseFloat(taxpercent) * parseFloat(sumplus);
+							var gross = sumplus + taxcost;
+							gross = gross.toFixed(2);
+							taxcost = taxcost.toFixed(2);
+							var itemtot = document.getElementById('total_items').value;
+							sumplus = sumplus.toFixed(2);
+							var new_quant = parseInt(current_quant) + parseInt(quant);
+							
+							
+							document.getElementById('total_items').value=new_quant;
+							document.getElementById('item_subtotal').value=sumplus;
+							document.getElementById('tax_total').value=taxcost;
+							document.getElementById('total_cost').value=gross;
+							document.getElementById('item_price').value=null;
+							document.getElementById('item_quantity').value=1;
+}
+
+function calcZero(item) {
+							//var item = item_value;
+
+							var sum = document.getElementById('total_cost').value;
+							var tax = document.getElementById('tax_rate').value;
+							var quant = document.getElementById('item_quantity').value;
+							var current_quant =	document.getElementById('total_items').value;
+
+							var quant_item = parseFloat(item) * parseFloat(quant);
+							var sumplus = parseFloat(sum) + parseFloat(quant_item);
+							var taxcost = 0;
+							var gross = sumplus + taxcost;
+							gross = gross.toFixed(2);
+							taxcost = taxcost.toFixed(2);
+							var itemtot = document.getElementById('total_items').value;
+							sumplus = sumplus.toFixed(2);
+							var new_quant = parseInt(current_quant) + parseInt(quant);
+									
+							document.getElementById('total_items').value=new_quant;
+							document.getElementById('item_subtotal').value=sumplus;
+							document.getElementById('tax_total').value=taxcost;
+							document.getElementById('total_cost').value=gross;
+							document.getElementById('item_price').value=null;
+							document.getElementById('item_quantity').value=1;
+}
+
+
+
+        </script>
+    </head>
+    <body onload="onCalcLoad()">
+	<br /><br />
+	<h1><center><img src="img/app_header.png"></center></h1>
+	<br />
+  	<table id="itemTable" width="100%" border="0">
+		<tr>
+		<td><img src="img/sales_tax.png"></td>
+		<td><input type="number" id="tax_rate" value="0"></td>
+		<td></td>
+		</tr>
+		<td><img src="img/quantity.png"></td>
+		<td><input type="number" id="item_quantity" value="1"/></td>
+		<td></td>
+		</tr>
+		<td><img src="img/item_price.png"></td>
+		<td><input type="number" id="item_price" value=""/></td>
+		<td colspan="2" align="center"><input type="button" id="submit_item" value="Submit Item" onclick="createNewItem(document.getElementById('item_price').value)"/></td>
+		</tr>
+	</table>
+	<br />
+	 <table id="summaryTable" border="0">
+		<tr>
+		<td><img src="img/summary_head.png"></td>
+		<td></td>
+		</tr>
+		<tr>
+		<td><img src="img/num_of_items.png"></td>
+		<td><input type="number" id="total_items" value="0"/></td>
+		</tr>
+		<tr>
+		<td><img src="img/subtotal.png"></td>
+		<td><input type="number" id="item_subtotal" value="0.00"/></td>
+		</tr>
+		<tr>
+		<td><img src="img/tax.png"></td>
+		<td><input type="number" id="tax_total" value="0.00"/></td>
+		</tr>
+		<tr>
+		<td><img src="img/total_cost.png"></td>
+		<td><input type="number" id="total_cost" value="0.00"/></td>
+		</tr>
+	</table>
+	<br />
+	<br />
+
+		
+	<center><input type="button" id="reset_data" value="Clear Data" onclick="clearItemData()"/></center>
+
+</body>
+</html>

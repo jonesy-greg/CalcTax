@@ -1,0 +1,841 @@
+﻿function DisableNewButton() {
+    // possible script to disable add new function
+    // set the status variable
+    var status = Xrm.Page.getAttribute("piv_orderstatus").getValue();
+
+    // if status reason is New, return true
+    return attribute.getValue() == 908010000; // Return true to enable the button
+}
+
+function preFilterLookupItem() {
+
+    // adding a prefilter against the item lookup
+    Xrm.Page.getControl("piv_item").addPreSearch(function () {
+        addLookupFilterItem();
+    });
+}
+
+function addLookupFilterItem() {
+
+    // set item lookup variable
+    var itemtype = Xrm.Page.getAttribute("piv_itemtype").getValue();
+
+    // set filter with fetch xml query
+
+    var fetchXml = "<filter type='and'><condition attribute='piv_type' operator='eq' value='" + itemtype + "'/></filter>";
+
+    // apply filter to lookup
+    Xrm.Page.getControl("piv_item").addCustomFilter(fetchXml);
+}
+
+
+
+function billingAmount() {
+
+    // set variable for type of item
+    var itemtype = Xrm.Page.getAttribute("piv_itemtype").getValue();
+
+    // quantity x unit price minus discount amount equates to billing amount total
+
+
+
+    var quantity = Xrm.Page.getAttribute("piv_quantity").getValue();
+    var unitprice = Xrm.Page.getAttribute("piv_unitprice").getValue();
+    var discoamount = Xrm.Page.getAttribute("piv_discountamount").getValue();
+
+    // calculate gross
+    var subtotal = quantity * unitprice
+
+    // apply discount if applicable
+    var total = quantity * unitprice - discoamount;
+
+    // set billing amount
+    Xrm.Page.getAttribute("piv_billingamount").setValue(total);
+
+    // if discount amount greater than cost, throw error
+    if (discoamount > subtotal) {
+        Xrm.Page.getControl("piv_discountamount").setNotification("Discount amount cannot be greater than (Quantity * Unit Price).");
+        Xrm.Page.getAttribute("piv_billingamount").setValue(null);
+    }
+
+        // otherwise clear the notification
+    else {
+        Xrm.Page.getControl("piv_discountamount").clearNotification();
+    }
+
+
+
+    // if item type is other, total equals unit price minus discount amount
+
+}
+
+function displayFields() {
+    // toggle visibility, values and required status of fields based on type of item
+
+    // wrap removal of option set value in timeout to avoid known IE 11 bug
+    setTimeout(function () {
+
+        //Xrm.Page.getControl("piv_itemtype").removeOption(908010000); //remove Terminal
+        Xrm.Page.getControl("piv_itemtype").removeOption(908010006); //remove Call Tag 
+        Xrm.Page.getControl("piv_itemtype").removeOption(908010009); //remove Central Bancard
+        Xrm.Page.getControl("piv_processor").removeOption(100000010); //remove Central Bancard
+        Xrm.Page.getControl("piv_processor").removeOption(100000005); //remove Chase
+        Xrm.Page.getControl("piv_processor").removeOption(100000015); //remove Element
+        Xrm.Page.getControl("piv_processor").removeOption(100000007); //remove Cynergy
+        Xrm.Page.getControl("piv_processor").removeOption(100000011); //remove CT Payments
+        Xrm.Page.getControl("piv_processor").removeOption(100000001); //remove Global
+        Xrm.Page.getControl("piv_processor").removeOption(100000012); //remove Global East
+        Xrm.Page.getControl("piv_processor").removeOption(100000013); //remove Global North
+        Xrm.Page.getControl("piv_processor").removeOption(100000014); //remove GlobalOne
+        Xrm.Page.getControl("piv_processor").removeOption(100000002); //remove Everlink
+        Xrm.Page.getControl("piv_processor").removeOption(100000009); //remove Elavon
+        Xrm.Page.getControl("piv_processor").removeOption(100000000); //remove Open Solutions
+        Xrm.Page.getControl("piv_processor").removeOption(100000004); //remove Pivotal Payments
+        Xrm.Page.getControl("piv_processor").removeOption(100000003); //remove Planet Payment
+
+
+    }, 1000);
+
+    // set the item variable
+    formtype = Xrm.Page.getAttribute("piv_itemtype").getValue();
+
+    // set static fields required
+    Xrm.Page.getAttribute("piv_unitprice").setRequiredLevel("required");
+    Xrm.Page.getAttribute("piv_quantity").setRequiredLevel("required");
+
+
+
+    // if form type is Terminal
+    if (formtype == 908010000) {
+        //Xrm.Page.getControl("piv_item").setVisible(false);
+		Xrm.Page.getControl("piv_subtype").setVisible(false);
+        Xrm.Page.getControl("piv_processor").setVisible(true);
+        Xrm.Page.getControl("piv_injection").setVisible(true);
+        Xrm.Page.getControl("piv_mid").setVisible(true);
+        Xrm.Page.getControl("piv_tid").setVisible(true);
+        Xrm.Page.getControl("piv_authcode").setVisible(true);
+        Xrm.Page.getControl("piv_web").setVisible(true);
+        Xrm.Page.getControl("piv_ebt").setVisible(true);
+        Xrm.Page.getControl("piv_giftcards").setVisible(true);
+        Xrm.Page.getControl("piv_software").setVisible(true);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(true);
+        Xrm.Page.getControl("piv_pindebit").setVisible(true);
+        Xrm.Page.getControl("piv_pinpad").setVisible(true);
+        Xrm.Page.getAttribute("piv_pinpad").setValue(908010001);
+        Xrm.Page.getAttribute("piv_pinpad").setRequiredLevel("required");
+        Xrm.Page.getControl("piv_autoclose").setVisible(true);
+        Xrm.Page.getControl("piv_autoclosetime").setVisible(true);
+        Xrm.Page.getControl("piv_tips").setVisible(true);
+        Xrm.Page.getAttribute("piv_tips").setValue(100000001);
+        Xrm.Page.getAttribute("piv_tips").setRequiredLevel("required");
+        Xrm.Page.getControl("piv_condition").setVisible(true);
+        Xrm.Page.getControl("piv_terminalmake").setVisible(true);
+        Xrm.Page.getControl("piv_terminalmodel").setVisible(true);
+        Xrm.Page.getControl("piv_quantity").setVisible(true);
+        Xrm.Page.getAttribute("piv_quantity").setValue(1);
+        Xrm.Page.ui.controls.get("piv_quantity").setDisabled(true);
+        Xrm.Page.getControl("piv_deploymentneeded").setVisible(true);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setValue(100000000);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setRequiredLevel("required");
+        Xrm.Page.getControl("piv_notes").setVisible(true);
+        Xrm.Page.getControl("piv_kitting").setVisible(false);
+    }
+
+
+
+        // if form type is Pin Pad
+    else if (formtype == 908010001) {
+        //Xrm.Page.getControl("piv_item").setVisible(true);
+        //Xrm.Page.getAttribute("piv_item").setRequiredLevel("required");
+		Xrm.Page.getControl("piv_subtype").setVisible(false);
+        Xrm.Page.getControl("piv_processor").setVisible(false);
+        Xrm.Page.getControl("piv_injection").setVisible(false);
+        Xrm.Page.getControl("piv_mid").setVisible(false);
+        Xrm.Page.getControl("piv_tid").setVisible(false);
+        Xrm.Page.getControl("piv_authcode").setVisible(false);
+        Xrm.Page.getControl("piv_web").setVisible(false);
+        Xrm.Page.getControl("piv_ebt").setVisible(false);
+        Xrm.Page.getControl("piv_giftcards").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_pindebit").setVisible(false);
+        Xrm.Page.getControl("piv_pinpad").setVisible(false);
+        Xrm.Page.getControl("piv_autoclose").setVisible(false);
+        Xrm.Page.getControl("piv_autoclosetime").setVisible(false);
+        Xrm.Page.getControl("piv_tips").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_terminalmake").setVisible(true);
+        Xrm.Page.getControl("piv_terminalmodel").setVisible(true);
+        Xrm.Page.getControl("piv_condition").setVisible(true);
+        Xrm.Page.getAttribute("piv_condition").setRequiredLevel("required");
+        Xrm.Page.getControl("piv_quantity").setVisible(true);
+        Xrm.Page.getAttribute("piv_quantity").setValue(1);
+        Xrm.Page.ui.controls.get("piv_quantity").setDisabled(true);
+        Xrm.Page.getControl("piv_deploymentneeded").setVisible(true);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setValue(100000000);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setRequiredLevel("required");
+        Xrm.Page.getControl("piv_notes").setVisible(false);
+        Xrm.Page.getAttribute("piv_notes").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_kitting").setVisible(false);
+        Xrm.Page.getAttribute("piv_kitting").setRequiredLevel("none");
+    }
+
+        // if form type is Card Reader
+    else if (formtype == 908010002) {
+        //Xrm.Page.getControl("piv_item").setVisible(true);
+        //Xrm.Page.getAttribute("piv_item").setRequiredLevel("required");
+		Xrm.Page.getControl("piv_subtype").setVisible(false);
+        Xrm.Page.getControl("piv_processor").setVisible(false);
+        Xrm.Page.getControl("piv_injection").setVisible(false);
+        Xrm.Page.getControl("piv_mid").setVisible(false);
+        Xrm.Page.getControl("piv_tid").setVisible(false);
+        Xrm.Page.getControl("piv_authcode").setVisible(false);
+        Xrm.Page.getControl("piv_web").setVisible(false);
+        Xrm.Page.getControl("piv_ebt").setVisible(false);
+        Xrm.Page.getControl("piv_giftcards").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_pindebit").setVisible(false);
+        Xrm.Page.getControl("piv_pinpad").setVisible(false);
+        Xrm.Page.getControl("piv_autoclose").setVisible(false);
+        Xrm.Page.getControl("piv_autoclosetime").setVisible(false);
+        Xrm.Page.getControl("piv_tips").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_terminalmake").setVisible(true);
+        Xrm.Page.getControl("piv_terminalmodel").setVisible(true);
+        Xrm.Page.getControl("piv_condition").setVisible(true);
+        Xrm.Page.getAttribute("piv_condition").setRequiredLevel("required");
+        Xrm.Page.getControl("piv_quantity").setVisible(true);
+        Xrm.Page.getAttribute("piv_quantity").setValue(1);
+        Xrm.Page.ui.controls.get("piv_quantity").setDisabled(true);
+        Xrm.Page.getControl("piv_deploymentneeded").setVisible(true);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setValue(100000000);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setRequiredLevel("required");
+        Xrm.Page.getControl("piv_notes").setVisible(false);
+        Xrm.Page.getAttribute("piv_notes").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_kitting").setVisible(false);
+        Xrm.Page.getAttribute("piv_kitting").setRequiredLevel("none");
+
+    }
+
+        // if form type is Base
+    else if (formtype == 908010003) {
+        //Xrm.Page.getControl("piv_item").setVisible(true);
+        //Xrm.Page.getAttribute("piv_item").setRequiredLevel("required");
+		Xrm.Page.getControl("piv_subtype").setVisible(false);       
+	    Xrm.Page.getControl("piv_processor").setVisible(false);
+        Xrm.Page.getControl("piv_injection").setVisible(false);
+        Xrm.Page.getControl("piv_mid").setVisible(false);
+        Xrm.Page.getControl("piv_tid").setVisible(false);
+        Xrm.Page.getControl("piv_authcode").setVisible(false);
+        Xrm.Page.getControl("piv_web").setVisible(false);
+        Xrm.Page.getControl("piv_ebt").setVisible(false);
+        Xrm.Page.getControl("piv_giftcards").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_pindebit").setVisible(false);
+        Xrm.Page.getControl("piv_pinpad").setVisible(false);
+        Xrm.Page.getControl("piv_autoclose").setVisible(false);
+        Xrm.Page.getControl("piv_autoclosetime").setVisible(false);
+        Xrm.Page.getControl("piv_tips").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_terminalmake").setVisible(true);
+        Xrm.Page.getControl("piv_terminalmodel").setVisible(true);
+        Xrm.Page.getControl("piv_condition").setVisible(true);
+        Xrm.Page.getAttribute("piv_condition").setRequiredLevel("required");
+        Xrm.Page.getControl("piv_quantity").setVisible(true);
+        Xrm.Page.getAttribute("piv_quantity").setValue(1);
+        Xrm.Page.ui.controls.get("piv_quantity").setDisabled(true);
+        Xrm.Page.getControl("piv_deploymentneeded").setVisible(true);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setValue(100000000);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setRequiredLevel("required");
+        Xrm.Page.getControl("piv_notes").setVisible(false);
+        Xrm.Page.getAttribute("piv_notes").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_kitting").setVisible(false);
+        Xrm.Page.getAttribute("piv_kitting").setRequiredLevel("none");
+    }
+
+        // if form type is Accessory
+    else if (formtype == 908010004) {
+        //Xrm.Page.getControl("piv_item").setVisible(true);
+        //Xrm.Page.getAttribute("piv_item").setRequiredLevel("required");
+        Xrm.Page.getControl("piv_subtype").setVisible(true);
+		Xrm.Page.getControl("piv_processor").setVisible(false);
+        Xrm.Page.getControl("piv_injection").setVisible(false);
+        Xrm.Page.getControl("piv_mid").setVisible(false);
+        Xrm.Page.getControl("piv_tid").setVisible(false);
+        Xrm.Page.getControl("piv_authcode").setVisible(false);
+        Xrm.Page.getControl("piv_web").setVisible(false);
+        Xrm.Page.getControl("piv_ebt").setVisible(false);
+        Xrm.Page.getControl("piv_giftcards").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_pindebit").setVisible(false);
+        Xrm.Page.getControl("piv_pinpad").setVisible(false);
+        Xrm.Page.getControl("piv_autoclose").setVisible(false);
+        Xrm.Page.getControl("piv_autoclosetime").setVisible(false);
+        Xrm.Page.getControl("piv_tips").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_terminalmake").setVisible(false);
+        Xrm.Page.getControl("piv_terminalmodel").setVisible(false);
+        Xrm.Page.getControl("piv_condition").setVisible(false);
+        Xrm.Page.getAttribute("piv_condition").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_quantity").setVisible(true);
+        Xrm.Page.getAttribute("piv_quantity").setValue(null);
+        Xrm.Page.ui.controls.get("piv_quantity").setDisabled(false);
+        Xrm.Page.getControl("piv_deploymentneeded").setVisible(false);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setValue(100000000);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_notes").setVisible(true);
+        Xrm.Page.getAttribute("piv_notes").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_kitting").setVisible(false);
+        Xrm.Page.getAttribute("piv_kitting").setRequiredLevel("none");
+    }
+
+        // if form type is Supply
+    else if (formtype == 908010005) {
+        //Xrm.Page.getControl("piv_item").setVisible(true);
+        //Xrm.Page.getAttribute("piv_item").setRequiredLevel("required");
+        Xrm.Page.getControl("piv_subtype").setVisible(true);
+		Xrm.Page.getControl("piv_processor").setVisible(false);
+        Xrm.Page.getControl("piv_injection").setVisible(false);
+        Xrm.Page.getControl("piv_mid").setVisible(false);
+        Xrm.Page.getControl("piv_tid").setVisible(false);
+        Xrm.Page.getControl("piv_authcode").setVisible(false);
+        Xrm.Page.getControl("piv_web").setVisible(false);
+        Xrm.Page.getControl("piv_ebt").setVisible(false);
+        Xrm.Page.getControl("piv_giftcards").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_pindebit").setVisible(false);
+        Xrm.Page.getControl("piv_pinpad").setVisible(false);
+        Xrm.Page.getControl("piv_autoclose").setVisible(false);
+        Xrm.Page.getControl("piv_autoclosetime").setVisible(false);
+        Xrm.Page.getControl("piv_tips").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_terminalmake").setVisible(false);
+        Xrm.Page.getControl("piv_terminalmodel").setVisible(false);
+        Xrm.Page.getControl("piv_condition").setVisible(false);
+        Xrm.Page.getAttribute("piv_condition").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_quantity").setVisible(true);
+        Xrm.Page.getAttribute("piv_quantity").setValue(null);
+        Xrm.Page.ui.controls.get("piv_quantity").setDisabled(false);
+        Xrm.Page.getControl("piv_deploymentneeded").setVisible(false);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setValue(100000000);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_notes").setVisible(true);
+        Xrm.Page.getAttribute("piv_notes").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_kitting").setVisible(false);
+        Xrm.Page.getAttribute("piv_kitting").setRequiredLevel("none");
+    }
+
+        // if form type is Call Tag
+    else if (formtype == 908010006) {
+        //Xrm.Page.getControl("piv_item").setVisible(true);
+        //Xrm.Page.getAttribute("piv_item").setRequiredLevel("required");
+		Xrm.Page.getControl("piv_subtype").setVisible(false);
+        Xrm.Page.getControl("piv_processor").setVisible(false);
+        Xrm.Page.getControl("piv_injection").setVisible(false);
+        Xrm.Page.getControl("piv_mid").setVisible(false);
+        Xrm.Page.getControl("piv_tid").setVisible(false);
+        Xrm.Page.getControl("piv_authcode").setVisible(false);
+        Xrm.Page.getControl("piv_web").setVisible(false);
+        Xrm.Page.getControl("piv_ebt").setVisible(false);
+        Xrm.Page.getControl("piv_giftcards").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_pindebit").setVisible(false);
+        Xrm.Page.getControl("piv_pinpad").setVisible(false);
+        Xrm.Page.getControl("piv_autoclose").setVisible(false);
+        Xrm.Page.getControl("piv_autoclosetime").setVisible(false);
+        Xrm.Page.getControl("piv_tips").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_terminalmake").setVisible(false);
+        Xrm.Page.getControl("piv_terminalmodel").setVisible(false);
+        Xrm.Page.getControl("piv_condition").setVisible(true);
+        Xrm.Page.getAttribute("piv_condition").setRequiredLevel("required");
+        Xrm.Page.getControl("piv_quantity").setVisible(true);
+        Xrm.Page.getAttribute("piv_quantity").setValue(1);
+        Xrm.Page.ui.controls.get("piv_quantity").setDisabled(true);
+        Xrm.Page.getControl("piv_deploymentneeded").setVisible(true);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setValue(100000000);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setRequiredLevel("required");
+        Xrm.Page.getControl("piv_notes").setVisible(false);
+        Xrm.Page.getAttribute("piv_notes").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_kitting").setVisible(false);
+        Xrm.Page.getAttribute("piv_kitting").setRequiredLevel("none");
+    }
+
+        // if form type is Welcome Kit
+    else if (formtype == 908010007) {
+        //Xrm.Page.getControl("piv_item").setVisible(true);
+        // Xrm.Page.getAttribute("piv_item").setRequiredLevel("required");
+    	Xrm.Page.getControl("piv_subtype").setVisible(false);
+		Xrm.Page.getControl("piv_processor").setVisible(false);
+        Xrm.Page.getControl("piv_injection").setVisible(false);
+        Xrm.Page.getControl("piv_mid").setVisible(false);
+        Xrm.Page.getControl("piv_tid").setVisible(false);
+        Xrm.Page.getControl("piv_authcode").setVisible(false);
+        Xrm.Page.getControl("piv_web").setVisible(false);
+        Xrm.Page.getControl("piv_ebt").setVisible(false);
+        Xrm.Page.getControl("piv_giftcards").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_pindebit").setVisible(false);
+        Xrm.Page.getControl("piv_pinpad").setVisible(false);
+        Xrm.Page.getControl("piv_autoclose").setVisible(false);
+        Xrm.Page.getControl("piv_autoclosetime").setVisible(false);
+        Xrm.Page.getControl("piv_tips").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_terminalmake").setVisible(false);
+        Xrm.Page.getControl("piv_terminalmodel").setVisible(false);
+        Xrm.Page.getControl("piv_condition").setVisible(false);
+        Xrm.Page.getAttribute("piv_condition").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_quantity").setVisible(true);
+        Xrm.Page.getAttribute("piv_quantity").setValue(null);
+        Xrm.Page.ui.controls.get("piv_quantity").setDisabled(false);
+        Xrm.Page.getControl("piv_deploymentneeded").setVisible(false);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setValue(100000000);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_notes").setVisible(true);
+        Xrm.Page.getAttribute("piv_notes").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_kitting").setVisible(true);
+        Xrm.Page.getAttribute("piv_kitting").setRequiredLevel("required");
+    }
+        // if form type is SIM Card
+    else if (formtype == 908010008) {
+        //Xrm.Page.getControl("piv_item").setVisible(true);
+        //Xrm.Page.getAttribute("piv_item").setRequiredLevel("required");
+        Xrm.Page.getControl("piv_subtype").setVisible(true);
+		Xrm.Page.getControl("piv_processor").setVisible(false);
+        Xrm.Page.getControl("piv_injection").setVisible(false);
+        Xrm.Page.getControl("piv_mid").setVisible(false);
+        Xrm.Page.getControl("piv_tid").setVisible(false);
+        Xrm.Page.getControl("piv_authcode").setVisible(false);
+        Xrm.Page.getControl("piv_web").setVisible(false);
+        Xrm.Page.getControl("piv_ebt").setVisible(false);
+        Xrm.Page.getControl("piv_giftcards").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_pindebit").setVisible(false);
+        Xrm.Page.getControl("piv_pinpad").setVisible(false);
+        Xrm.Page.getControl("piv_autoclose").setVisible(false);
+        Xrm.Page.getControl("piv_autoclosetime").setVisible(false);
+        Xrm.Page.getControl("piv_tips").setVisible(false);
+        Xrm.Page.getControl("piv_software").setVisible(false);
+        Xrm.Page.getControl("piv_communicationtype").setVisible(false);
+        Xrm.Page.getControl("piv_terminalmake").setVisible(false);
+        Xrm.Page.getControl("piv_terminalmodel").setVisible(false);
+        Xrm.Page.getControl("piv_condition").setVisible(false);
+        Xrm.Page.getAttribute("piv_condition").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_quantity").setVisible(true);
+        Xrm.Page.getAttribute("piv_quantity").setValue(1);
+        Xrm.Page.ui.controls.get("piv_quantity").setDisabled(true);
+        Xrm.Page.getControl("piv_deploymentneeded").setVisible(false);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setValue(100000000);
+        Xrm.Page.getAttribute("piv_deploymentneeded").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_notes").setVisible(true);
+        Xrm.Page.getAttribute("piv_notes").setRequiredLevel("none");
+        Xrm.Page.getControl("piv_kitting").setVisible(false);
+        Xrm.Page.getAttribute("piv_kitting").setRequiredLevel("none");
+    }
+    else {
+
+    }
+}
+
+function filterSubType() {
+
+	// set itemtype variable
+	var itemroot = Xrm.Page.getAttribute("piv_itemtype").getValue();
+	
+	// set option set variables
+	
+	var papersix = { value : 908010000 , text : "2 1/4 x 60' Paper" };
+	var papereight = { value : 908010001 , text : "2 1/4 x 80' Paper" };
+	var paperonetwentyfive = { value : 908010002 , text : "3 1/8 x 125' Paper" };
+	var amex = { value : 908010003 , text : "Amex Sticker" };
+	var apriva = { value : 908010004 , text : "APRIVA SIM" };
+	var ethernet = { value : 908010005 , text : "Ethernet Cord" };
+	var fd130power = { value : 908010006 , text : "FD130 - Power Cord" };
+	var fd200power = { value : 908010007 , text : "FD200 - Power Cord" };
+	var fd410power = { value : 908010008 , text : "FD410 - Power Cord" };
+	var flex340power = { value : 908010009 , text : "FLEXPOIN 340 - Power Cord" };
+	var flex530power = { value : 908010010 , text : "FLEXPOIN 530 - Power Cord" };
+	var flex540power = { value : 908010011 , text : "FLEXPOIN 540 - Power Cord" };
+	var ic220power = { value : 908010012 , text : "IC220 - Power Cord" };
+	var ic250power = { value : 908010013 , text : "IC250 - Power Cord" };
+	var plates = { value : 908010014 , text : "Imprinter Plates" };
+	var slipslong = { value : 908010015 , text : "Imprinter Slips - Long" };
+	var slipsshort = { value : 908010016 , text : "Imprinter Slips - Short" };
+	var iwlcar = { value : 908010017 , text : "IWL Car Charger" };
+	var iwl200power = { value : 908010018 , text : "IWL200 - Power Cord" };
+	var iwl200bpower = { value : 908010019 , text : "IWL200B - Power Cord" };
+	var iwl250bpower = { value : 908010020 , text : "IWL250B - Power Cord" };
+	var iwl255power = { value : 908010021 , text : "IWL255 - Power Cord" };
+	var manualimp = { value : 908010022 , text : "Manual Imprinter" };
+	var s80power = { value : 908010023 , text : "PAX S80 - Power Cord" };
+	var s90power = { value : 908010024 , text : "PAX S90 - Power Cord" };
+	var phonecord = { value : 908010025 , text : "Phone Cord" };
+	var tns = { value : 908010026 , text : "TNS SIM" };
+	var visa_mc = { value : 908010027 , text : "Visa\MC sticker" };
+	var 520power = { value : 908010028 , text : "VX520 - Power Cord" };
+	var 6803gpower = { value : 908010029 , text : "Vx680 3G - Power Cord" };
+	var 680car = { value : 908010030 , text : "Vx680 Car Charger" };
+	var 680dongle = { value : 908010031 , text : "Vx680 Dongle" };
+	var 680wifipower = { value : 908010032 , text : "Vx680 Wifi - Power Cord" };
+	
+	//if SIM, filter subtype by SIM options
+	if (itemroot == 908010008) {
+		
+		// remove non-SIM values, ensure SIM values visible
+		Xrm.Page.getControl("piv_subtype").removeOption(908010000); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010001); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010002); // Supply 
+		Xrm.Page.getControl("piv_subtype").removeOption(908010003); // Supply
+		Xrm.Page.getControl("piv_subtype").addOption(apriva); // SIM Card
+		Xrm.Page.getControl("piv_subtype").removeOption(908010005); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010006); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010007); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010008); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010009); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010010); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010011); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010012); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010013); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010014); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010015); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010016); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010017); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010018); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010019); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010020); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010021); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010022); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010023); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010024); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010025); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(tns); // SIM Card
+		Xrm.Page.getControl("piv_subtype").removeOption(908010027); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010028); // Accessory 
+		Xrm.Page.getControl("piv_subtype").removeOption(908010029); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010030); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010031); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010032); // Accessory
+	}
+	
+	//if Accessory, filter subtype by Accessory options
+	else if (itemroot == 908010004) {
+	
+		// remove non-Accessory values, ensure Accessory values visible
+		Xrm.Page.getControl("piv_subtype").removeOption(908010000); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010001); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010002); // Supply 
+		Xrm.Page.getControl("piv_subtype").removeOption(908010003); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010004); // SIM Card
+		Xrm.Page.getControl("piv_subtype").addOption(ethernet); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(fd130power); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(fd200power); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(fd410power); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(flex340power); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(flex530power); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(flex540power); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(ic220power); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(ic250power); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010014); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010015); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010016); // Supply
+		Xrm.Page.getControl("piv_subtype").addOption(iwlcar); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(iwl200power); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(iwl200bpower); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(iwl250bpower); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(iwl255power); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010022); // Supply
+		Xrm.Page.getControl("piv_subtype").addOption(s80power); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(s90power); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(phonecord); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010026); // SIM Card
+		Xrm.Page.getControl("piv_subtype").removeOption(908010027); // Supply
+		Xrm.Page.getControl("piv_subtype").addOption(520power); // Accessory 
+		Xrm.Page.getControl("piv_subtype").addOption(6803gpower); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(680car); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(680dongle); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(680wifipower); // Accessory
+	
+	
+	}
+	
+	//if Supply, filter subtype by Supply order
+	else if (itemroot == 908010005) {
+
+		// remove non-Supply values, ensure Supply values visible
+		Xrm.Page.getControl("piv_subtype").addOption(papersix); // Supply
+		Xrm.Page.getControl("piv_subtype").addOption(papereight); // Supply
+		Xrm.Page.getControl("piv_subtype").addOption(paperonetwentyfive); // Supply 
+		Xrm.Page.getControl("piv_subtype").addOption(amex); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010004); // SIM Card
+		Xrm.Page.getControl("piv_subtype").removeOption(908010005); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010006); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010007); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010008); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010009); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010010); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010011); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010012); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010013); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(plates); // Supply
+		Xrm.Page.getControl("piv_subtype").addOption(slipslong); // Supply
+		Xrm.Page.getControl("piv_subtype").addOption(slipsshort); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010017); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010018); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010019); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010020); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010021); // Accessory
+		Xrm.Page.getControl("piv_subtype").addOption(manualimp); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010023); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010024); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010025); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010026); // SIM Card
+		Xrm.Page.getControl("piv_subtype").addOption(visa_mc); // Supply
+		Xrm.Page.getControl("piv_subtype").removeOption(908010028); // Accessory 
+		Xrm.Page.getControl("piv_subtype").removeOption(908010029); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010030); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010031); // Accessory
+		Xrm.Page.getControl("piv_subtype").removeOption(908010032); // Accessory
+	}
+	else {
+	
+	}
+	
+}
+
+function getLocationDetails() {
+
+    // set the lookup value to query data from
+    var lookUpObjectValue = Xrm.Page.getAttribute("piv_relatedmid").getValue();
+
+
+    if ((lookUpObjectValue != null)) {
+        var lookuptextvalue = lookUpObjectValue[0].name;
+        var lookupid = lookUpObjectValue[0].id;
+
+        // set site url
+        var serverUrl = Xrm.Page.context.getClientUrl();
+
+        //The XRM OData end-point
+        var ODATA_ENDPOINT = "/XRMServices/2011/OrganizationData.svc";
+        var odataSetName = "piv_midSet";
+        var odataSelect = serverUrl + ODATA_ENDPOINT + "/" + odataSetName + "(guid'" + lookupid + "')";
+
+
+
+        $.ajax({
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            datatype: "json",
+            url: odataSelect,
+            beforeSend: function (XMLHttpRequest) { XMLHttpRequest.setRequestHeader("Accept", "application/json"); },
+            success: function (data, textStatus, XmlHttpRequest) {
+
+                var result_MID = data.d;
+
+                // replace the fields with DBA location information
+                Xrm.Page.getAttribute("piv_plateline1").setValue(result_MID.piv_DBAName);
+                Xrm.Page.getAttribute("piv_plateline2").setValue(result_MID.piv_Backend_MID);
+
+                // calculate and combine address data
+                var add1 = result_MID.piv_Address1_Line1;
+                var add2 = result_MID.piv_Address1_Line2;
+                var addfinal = add1 + " " + add2;
+                Xrm.Page.getAttribute("piv_plateline3").setValue(addfinal);
+
+                // calculate and combine city and state data
+                var city = result_MID.piv_Address1_City;
+                var state = result_MID.piv_Address1_StateOrProvince;
+                var citystate = city + " " + state;
+
+                Xrm.Page.getAttribute("piv_plateline4").setValue(citystate);
+                Xrm.Page.getAttribute("piv_plateline5").setValue(result_MID.piv_Address1_PostalCode);
+
+            },
+            error: function (XmlHttpRequest, textStatus, errorThrown) { alert('OData Select Failed: ' + odataSelect); }
+        });
+
+
+    }
+
+}
+
+function nullItem() {
+
+    // on call, null the lookup against deployment products and related fields
+    //Xrm.Page.getAttribute("piv_item").setValue(null);
+    Xrm.Page.getAttribute("piv_partnumber").setValue(null);
+    Xrm.Page.getAttribute("piv_unitprice").setValue(null);
+    Xrm.Page.getAttribute("piv_discountamount").setValue(null);
+    Xrm.Page.getAttribute("piv_discountedby").setValue(null);
+    Xrm.Page.getAttribute("piv_condition").setValue(null);
+    //Xrm.Page.getAttribute("piv_deploymentneeded").setValue(null);
+    Xrm.Page.getAttribute("piv_billingamount").setValue(null);
+    Xrm.Page.getAttribute("piv_plateline1").setValue(null);
+    Xrm.Page.getAttribute("piv_plateline2").setValue(null);
+    Xrm.Page.getAttribute("piv_plateline3").setValue(null);
+    Xrm.Page.getAttribute("piv_plateline4").setValue(null);
+    Xrm.Page.getAttribute("piv_plateline5").setValue(null);
+    Xrm.Page.getControl("piv_plateline1").setVisible(false);
+    Xrm.Page.getControl("piv_plateline2").setVisible(false);
+    Xrm.Page.getControl("piv_plateline3").setVisible(false);
+    Xrm.Page.getControl("piv_plateline4").setVisible(false);
+    Xrm.Page.getControl("piv_plateline5").setVisible(false);
+    Xrm.Page.getAttribute("piv_processor").setValue(null);
+    Xrm.Page.getAttribute("piv_injection").setValue(null);
+    //Xrm.Page.getAttribute("piv_mid").setValue(null);
+    Xrm.Page.getAttribute("piv_tid").setValue(null);
+    Xrm.Page.getAttribute("piv_authcode").setValue(null);
+    Xrm.Page.getAttribute("piv_web").setValue(null);
+    Xrm.Page.getAttribute("piv_ebt").setValue(null);
+    Xrm.Page.getAttribute("piv_giftcards").setValue(null);
+    Xrm.Page.getAttribute("piv_software").setValue(null);
+    Xrm.Page.getAttribute("piv_communicationtype").setValue(null);
+    Xrm.Page.getAttribute("piv_pindebit").setValue(null);
+    Xrm.Page.getAttribute("piv_pinpad").setValue(null);
+    Xrm.Page.getAttribute("piv_autoclose").setValue(null);
+    Xrm.Page.getAttribute("piv_autoclosetime").setValue(null);
+    Xrm.Page.getAttribute("piv_tips").setValue(null);
+    Xrm.Page.getAttribute("piv_terminalmake").setValue(null);
+    Xrm.Page.getAttribute("piv_terminalmodel").setValue(null);
+
+}
+
+function fieldSubFilter() {
+
+    // set item variable
+    var itemlookup = Xrm.Page.getAttribute("piv_item");
+
+    // if item contains data
+    if (itemlookup != null) {
+
+
+        // get the item data value
+        var itemlookupValue = itemlookup.getValue();
+
+        // if the value contains data
+        if (itemlookupValue != null) {
+
+            // get the label name of the lookup
+            var itemlookuptextValue = itemlookupValue[0].name;
+
+            // if the label name equals imprinter plates, populate plate fields
+            if (itemlookuptextValue == "Imprinter Plates") {
+
+                // call function to populate dba address data from related MID record
+                getLocationDetails();
+                Xrm.Page.getControl("piv_plateline1").setVisible(true);
+                Xrm.Page.getControl("piv_plateline2").setVisible(true);
+                Xrm.Page.getControl("piv_plateline3").setVisible(true);
+                Xrm.Page.getControl("piv_plateline4").setVisible(true);
+                Xrm.Page.getControl("piv_plateline5").setVisible(true);
+            }
+                // otherwise, keep fields hidden, null values if present
+            else if (itemlookuptextValue != "Imprinter Plates" || itemlookuptextValue == null) {
+                Xrm.Page.getAttribute("piv_plateline1").setValue(null);
+                Xrm.Page.getAttribute("piv_plateline2").setValue(null);
+                Xrm.Page.getAttribute("piv_plateline3").setValue(null);
+                Xrm.Page.getAttribute("piv_plateline4").setValue(null);
+                Xrm.Page.getAttribute("piv_plateline5").setValue(null);
+                Xrm.Page.getControl("piv_plateline1").setVisible(false);
+                Xrm.Page.getControl("piv_plateline2").setVisible(false);
+                Xrm.Page.getControl("piv_plateline3").setVisible(false);
+                Xrm.Page.getControl("piv_plateline4").setVisible(false);
+                Xrm.Page.getControl("piv_plateline5").setVisible(false);
+            }
+        }
+
+    }
+}
+
+function getProductInfo() {
+
+    // set the lookup value of the product item
+    var lookUpObjectValue = Xrm.Page.getAttribute("piv_item").getValue();
+
+    if ((lookUpObjectValue != null)) {
+        var lookuptextvalue = lookUpObjectValue[0].name;
+        var lookupid = lookUpObjectValue[0].id;
+
+        // set site url
+        var serverUrl = Xrm.Page.context.getClientUrl();
+
+        //The XRM OData end-point
+        var ODATA_ENDPOINT = "/XRMServices/2011/OrganizationData.svc";
+        var odataSetName = "piv_deploymentproductSet";
+        var odataSelect = serverUrl + ODATA_ENDPOINT + "/" + odataSetName + "(guid'" + lookupid + "')";
+
+        $.ajax({
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            datatype: "json",
+            url: odataSelect,
+            beforeSend: function (XMLHttpRequest) { XMLHttpRequest.setRequestHeader("Accept", "application/json"); },
+            success: function (data, textStatus, XmlHttpRequest) {
+
+                var result_deployproduct = data.d;
+
+                // replace the fields with DBA location information
+                Xrm.Page.getAttribute("piv_partnumber").setValue(result_deployproduct.piv_PartNumber);
+
+            },
+            error: function (XmlHttpRequest, textStatus, errorThrown) { alert('OData Select Failed: ' + odataSelect); }
+        });
+    }
+}
+
+
+function toggleDiscountApproval() {
+
+    var disco = Xrm.Page.getAttribute("piv_discountamount").getValue();
+
+    // discount amount contains data
+    if (disco != null) {
+        // set the discounted by field to visible
+        Xrm.Page.getControl("piv_discountedby").setVisible(true);
+        Xrm.Page.getAttribute("piv_discountedby").setRequiredLevel("required");
+    }
+
+    else {
+        // set the discounted by field to hidden
+        Xrm.Page.getControl("piv_discountedby").setVisible(false);
+        Xrm.Page.getAttribute("piv_discountedby").setRequiredLevel("none");
+    }
+}
+
+function RestrictOrderItemDelete() {
+    var depOrderStatus = Xrm.Page.getAttribute("piv_orderstatus").getValue();
+
+    if (depOrderStatus != 908010000) {
+        Xrm.Utility.alertDialog("Unable to delete order item. Order already submitted.");
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+function RestrictOrderItemAdd() {
+    var depOrderStatus = Xrm.Page.getAttribute("piv_orderstatus").getValue();
+
+    if (depOrderStatus != 908010000) {
+        Xrm.Utility.alertDialog("Unable to add order item. Order already submitted.");
+        return false;
+    }
+    else {
+        return true;
+    }
+}

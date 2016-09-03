@@ -1,5 +1,5 @@
 <widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0" id="com.phonegap.helloworld" version="1.0.0">
-  <name>CalcTax</name>
+  <name>CalcTax v1.0</name>
   <description>A basic calculator for determining the cost of items with sales tax.</description>
   <author href="" email="jonesyapps@gmail.com ">Jonesy Apps</author>
   <content src="index.html"/>
